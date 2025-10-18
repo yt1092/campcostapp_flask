@@ -20,15 +20,24 @@ def index():
         form_camp_exempt=[],
         errors=[]
     )
+
 @app.route("/calculate", methods=["POST"])
 def calculate():
     form = request.form
     cleaned = {}
-    for k, v in form.items():
-        if k in ["food", "transport", "camp"]:
-            cleaned[k] = v.replace(",", "")
-        else:
-            cleaned[k] = v
+    for k in ["food", "transport", "camp", "people"]:
+        v = form.get(k, "0")
+        cleaned[k] = int(v.replace(",", ""))
+    names = []
+    i = 0
+    while f"name_{i}" in form:
+        names.append(form.get(f"name_{i}", f"メンバー{i+1}"))
+        i += 1
+    cleaned["names"] = names
+
+    cleaned["food_exempt"] = [c == "on" for c in form.getlist("food_exempt[]")]
+    cleaned["transport_exempt"] = [c == "on" for c in form.getlist("transport_exempt[]")]
+    cleaned["camp_exempt"] = [c == "on" for c in form.getlist("camp_exempt[]")]
 
     data = parse_form(cleaned)
     errors = validate_input(data)
@@ -37,14 +46,15 @@ def calculate():
             "index.html",
             errors=errors,
             form_people=data.people,
-            form_food=int(data.food),
-            form_transport=int(data.transport),
-            form_camp=int(data.camp),
+            form_food=data.food,
+            form_transport=data.transport,
+            form_camp=data.camp,
             form_names=data.names,
             form_food_exempt=data.food_exempt,
             form_transport_exempt=data.transport_exempt,
             form_camp_exempt=data.camp_exempt,
         )
+
     results_raw = calculate_costs(data)
     results = format_results(results_raw)
     return render_template(
@@ -61,7 +71,6 @@ def calculate():
     )
 
 if __name__ == "__main__":
-
+    import os
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
-
-
