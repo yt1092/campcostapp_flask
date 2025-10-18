@@ -34,6 +34,7 @@ def index():
 @app.route("/calculate", methods=["POST"])
 def calculate():
     data = parse_form(request.form)
+
     errors = validate_input(data)
     if errors:
         return render_template(
@@ -51,7 +52,7 @@ def calculate():
         )
 
     results_raw = calculate_costs(data)
-    results = format_results(results_raw) 
+    results = format_results(results_raw)
 
     return render_template(
         "index.html",
@@ -71,4 +72,3 @@ def calculate():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
-
