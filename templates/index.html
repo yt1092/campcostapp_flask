@@ -61,12 +61,13 @@
 
   <script src="/static/script.js"></script>
   <script>
-    const initialPeople = {{ form_people or 4 }};
-    const initialNames = {{ form_names|tojson or '[]' }};
-    const initialFoodExempt = {{ form_food_exempt|tojson or '[]' }};
-    const initialTransportExempt = {{ form_transport_exempt|tojson or '[]' }};
-    const initialCampExempt = {{ form_camp_exempt|tojson or '[]' }};
-    initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
+  const initialPeople = {{ form_people or 4 }};
+  const initialNames = {{ form_names|tojson }};
+  const initialFoodExempt = {{ form_food_exempt|tojson }};
+  const initialTransportExempt = {{ form_transport_exempt|tojson }};
+  const initialCampExempt = {{ form_camp_exempt|tojson }};
+  initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
   </script>
 </body>
 </html>
+
