@@ -50,16 +50,33 @@ function updateMembers(n) {
   initMembers(n, states.names, states.foodEx, states.transportEx, states.campEx);
 }
 
-document.getElementById('people').addEventListener('input', (e) => {
-  updateMembers(parseInt(e.target.value) || 1);
-});
-document.getElementById('add-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = parseInt(input.value || "0") + 1;
-  updateMembers(parseInt(input.value));
-});
-document.getElementById('remove-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = Math.max(1, parseInt(input.value || "0") - 1);
-  updateMembers(parseInt(input.value));
+// イベントバインド
+document.addEventListener('DOMContentLoaded', () => {
+  const peopleInput = document.getElementById('people');
+  const addBtn = document.getElementById('add-person');
+  const removeBtn = document.getElementById('remove-person');
+
+  peopleInput.addEventListener('input', (e) => {
+    updateMembers(parseInt(e.target.value) || 1);
+  });
+
+  addBtn.addEventListener('click', () => {
+    peopleInput.value = parseInt(peopleInput.value || "0") + 1;
+    updateMembers(parseInt(peopleInput.value));
+  });
+
+  removeBtn.addEventListener('click', () => {
+    peopleInput.value = Math.max(1, parseInt(peopleInput.value || "0") - 1);
+    updateMembers(parseInt(peopleInput.value));
+  });
+
+  if (window.initialData) {
+    initMembers(
+      window.initialData.form_people,
+      window.initialData.form_names,
+      window.initialData.form_food_exempt,
+      window.initialData.form_transport_exempt,
+      window.initialData.form_camp_exempt
+    );
+  }
 });
