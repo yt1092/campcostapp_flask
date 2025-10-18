@@ -60,13 +60,13 @@
   </div>
 
   <script src="/static/script.js"></script>
-  <script>
+<script>
   const initialPeople = {{ form_people }};
   const initialNames = {{ form_names|tojson }};
-  const initialFoodExempt = {{ form_food_exempt|tojson }};
-  const initialTransportExempt = {{ form_transport_exempt|tojson }};
-  const initialCampExempt = {{ form_camp_exempt|tojson }};
-  initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
-  </script>
+  const initialFoodEx = {{ form_food_exempt|tojson }};
+  const initialTransportEx = {{ form_transport_exempt|tojson }};
+  const initialCampEx = {{ form_camp_exempt|tojson }};
+</script>
 </body>
 </html>
+
