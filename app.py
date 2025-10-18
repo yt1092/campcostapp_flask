@@ -21,21 +21,26 @@ def index():
         errors=[]
     )
 
+
+    results_raw = calculate_costs(data)
+    results = format_results(results_raw)
+    return render_template(
+        "index.html",
+        results=results,
+        form_people=data.people,
+        form_food=data.food,
+        form_transport=data.transport,
+        form_camp=data.camp,
+        form_names=data.names,
+        form_food_exempt=data.food_exempt,
+        form_transport_exempt=data.transport_exempt,
+        form_camp_exempt=data.camp_exempt,
+    )
 @app.route("/calculate", methods=["POST"])
 def calculate():
-    form = request.form
-    cleaned = {}
-    for k in ["food", "transport", "camp", "people"]:
-        v = form.get(k, "0")
-        cleaned[k] = int(v.replace(",", ""))
-    names = []
-    i = 0
-    while f"name_{i}" in form:
-        names.append(form.get(f"name_{i}", f"メンバー{i+1}"))
-        i += 1
-    cleaned["names"] = names
+    form = request.form  # ImmutableMultiDict
+    data = parse_form(form)  # ← dict に変換せずそのまま渡す
 
-    data = parse_form(cleaned)
     errors = validate_input(data)
     if errors:
         return render_template(
@@ -65,10 +70,24 @@ def calculate():
         form_transport_exempt=data.transport_exempt,
         form_camp_exempt=data.camp_exempt,
     )
-
+    results_raw = calculate_costs(data)
+    results = format_results(results_raw)
+    return render_template(
+        "index.html",
+        results=results,
+        form_people=data.people,
+        form_food=data.food,
+        form_transport=data.transport,
+        form_camp=data.camp,
+        form_names=data.names,
+        form_food_exempt=data.food_exempt,
+        form_transport_exempt=data.transport_exempt,
+        form_camp_exempt=data.camp_exempt,
+    )
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=True)
+
 
 
