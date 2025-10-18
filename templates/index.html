@@ -1,72 +1,77 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <title>キャンプ費用計算</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container py-4">
-  <h2>キャンプ費用計算</h2>
+from flask import Flask, render_template, request
+from calc.input_handler import parse_form
+from calc.validator import validate_input
+from calc.calculator import calculate_costs
+from calc.formatter import format_results
 
-  {% if errors %}
-    <div class="alert alert-danger">
-      <ul>
-        {% for e in errors %}
-          <li>{{ e }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
-  <form method="post" action="/calculate">
-    <div class="row g-2 mb-2">
-      <div class="col-2">
-        <label class="form-label">人数</label>
-        <input id="people" name="people" type="number" class="form-control" value="{{ form_people or 4 }}" min="1" max="100">
-        <div class="d-flex mt-1">
-          <button type="button" class="btn btn-outline-primary me-1" id="add-person">＋</button>
-          <button type="button" class="btn btn-outline-danger" id="remove-person">−</button>
-        </div>
-      </div>
-      <div class="col">
-        <label class="form-label">食費 (円)</label>
-        <input name="food" type="number" class="form-control" value="{{ form_food or 10000 }}">
-      </div>
-      <div class="col">
-        <label class="form-label">交通費 (円)</label>
-        <input name="transport" type="number" class="form-control" value="{{ form_transport or 8000 }}">
-      </div>
-      <div class="col">
-        <label class="form-label">キャンプ場 (円)</label>
-        <input name="camp" type="number" class="form-control" value="{{ form_camp or 12000 }}">
-      </div>
-    </div>
 
-    <div id="members"></div>
+@app.route("/", methods=["GET"])
+def index():
+    return render_template(
+        "index.html",
+        form_names=[],
+        form_people=4,
+        form_food=10000,
+        form_transport=8000,
+        form_camp=12000,
+        form_food_exempt=[],
+        form_transport_exempt=[],
+        form_camp_exempt=[],
+        results=[],
+        errors=[]
+    )
 
-    <button class="btn btn-success mt-3" type="submit">計算する</button>
-  </form>
 
-  {% if results %}
-    <hr>
-    <h4>計算結果</h4>
-    <ul class="list-unstyled">
-      {% for r in results %}
-        <li>{{ r }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-</div>
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    form = request.form
+    data = parse_form(form)
 
-<script src="/static/script.js"></script>
-<script>
-const initialPeople = {{ form_people }};
-const initialNames = {{ form_names|tojson }};
-const initialFoodExempt = {{ form_food_exempt|tojson }};
-const initialTransportExempt = {{ form_transport_exempt|tojson }};
-const initialCampExempt = {{ form_camp_exempt|tojson }};
-initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
-</script>
-</body>
-</html>
+    # 小数(.0)除去
+    try:
+        data.food = int(float(data.food))
+        data.transport = int(float(data.transport))
+        data.camp = int(float(data.camp))
+    except ValueError:
+        pass
+
+    errors = validate_input(data)
+    if errors:
+        return render_template(
+            "index.html",
+            errors=errors,
+            form_people=data.people,
+            form_food=data.food,
+            form_transport=data.transport,
+            form_camp=data.camp,
+            form_names=data.names,
+            form_food_exempt=data.food_exempt,
+            form_transport_exempt=data.transport_exempt,
+            form_camp_exempt=data.camp_exempt,
+            results=[]
+        )
+
+    results_raw = calculate_costs(data)
+    results = format_results(results_raw)
+
+    return render_template(
+        "index.html",
+        results=results,
+        errors=[],
+        form_people=data.people,
+        form_food=data.food,
+        form_transport=data.transport,
+        form_camp=data.camp,
+        form_names=data.names,
+        form_food_exempt=data.food_exempt,
+        form_transport_exempt=data.transport_exempt,
+        form_camp_exempt=data.camp_exempt,
+    )
+
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port, debug=True)
