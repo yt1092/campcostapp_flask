@@ -35,10 +35,6 @@ def calculate():
         i += 1
     cleaned["names"] = names
 
-    cleaned["food_exempt"] = [c == "on" for c in form.getlist("food_exempt[]")]
-    cleaned["transport_exempt"] = [c == "on" for c in form.getlist("transport_exempt[]")]
-    cleaned["camp_exempt"] = [c == "on" for c in form.getlist("camp_exempt[]")]
-
     data = parse_form(cleaned)
     errors = validate_input(data)
     if errors:
@@ -74,3 +70,4 @@ if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
+
