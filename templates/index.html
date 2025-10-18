@@ -1,3 +1,4 @@
+{% set safe_count = count or 3 %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -22,9 +23,7 @@
             text-align: center;
             color: #333;
         }
-        form {
-            margin-top: 20px;
-        }
+        form { margin-top: 20px; }
         label {
             display: inline-block;
             width: 120px;
@@ -47,16 +46,9 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        button:hover {
-            background-color: #0056b3;
-        }
-        hr {
-            margin: 20px 0;
-        }
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
+        button:hover { background-color: #0056b3; }
+        hr { margin: 20px 0; }
+        ul { list-style: none; padding-left: 0; }
         li {
             background: #eef4ff;
             margin: 6px 0;
@@ -71,15 +63,15 @@
 
     <form method="post">
         <label>人数：</label>
-        <input type="number" name="count" min="1" value="{{ count }}">
+        <input type="number" name="count" min="1" value="{{ safe_count }}">
         <button type="submit">人数を変更</button>
-
         <hr>
 
-        {% for i in range(count) %}
+        {% for i in range(safe_count) %}
         <div>
             <label>メンバー {{ loop.index }}：</label>
-            <input type="text" name="member{{ loop.index0 }}" value="{{ members[loop.index0] if members|length > loop.index0 }}">
+            <input type="text" name="member{{ loop.index0 }}"
+                   value="{{ members[loop.index0] if members|length > loop.index0 }}">
         </div>
         {% endfor %}
 
