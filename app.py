@@ -52,7 +52,7 @@ def calculate():
         )
 
     results_raw = calculate_costs(data)
-    results = format_results(results_raw)
+    results = format_results(results_raw, as_integer=True)
 
     return render_template(
         "index.html",
