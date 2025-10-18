@@ -1,45 +1,77 @@
 from calc.m_types import InputData
 
+def _as_list_from_form(form, key):
+    """
+    form may be ImmutableMultiDict (has getlist) or a plain dict (no getlist).
+    This returns a list (possibly empty).
+    """
+    if hasattr(form, "getlist"):
+        return form.getlist(key)
+    # plain dict: maybe keys like "food_exempt[]" or "food_exempt" present with comma-separated value
+    v = form.get(key, [])
+    if isinstance(v, list):
+        return v
+    if v is None or v == "":
+        return []
+    # single string -> put into list
+    return [v]
+
+def _to_float_safe(s):
+    try:
+        if s is None:
+            return 0.0
+        if isinstance(s, (int, float)):
+            return float(s)
+        # remove commas and spaces
+        s2 = str(s).replace(",", "").strip()
+        if s2 == "":
+            return 0.0
+        return float(s2)
+    except Exception:
+        return 0.0
+
 def parse_form(form) -> InputData:
     """
     フォームデータを InputData に変換
-    空文字や不正な値が来ても安全に処理
+    - 数値はカンマありでもOK
+    - チェックボックスは name="xxx_exempt[]" で送られる想定
     """
-    # 人数
+    # 人数（int）
     try:
-        people = int(form.get("people", 1) or 1)
-    except ValueError:
+        people_raw = form.get("people", 1)
+        people = int(float(str(people_raw).replace(",", "").strip() or 1))
+    except Exception:
         people = 1
 
-    # 各費用
-    try:
-        food = float(form.get("food", 0) or 0)
-    except ValueError:
-        food = 0
-
-    try:
-        transport = float(form.get("transport", 0) or 0)
-    except ValueError:
-        transport = 0
-
-    try:
-        camp = float(form.get("camp", 0) or 0)
-    except ValueError:
-        camp = 0
+    # 各費用（float）
+    food = _to_float_safe(form.get("food", 0))
+    transport = _to_float_safe(form.get("transport", 0))
+    camp = _to_float_safe(form.get("camp", 0))
 
     # メンバー名（人数に応じてリスト化）
     names = []
     for i in range(people):
-        name = form.get(f"name_{i}", "").strip()
+        # form key name_{i}
+        key = f"name_{i}"
+        raw = form.get(key, "")
+        name = str(raw).strip() if raw is not None else ""
         if not name:
             name = f"メンバー{i+1}"
         names.append(name)
 
-    # チェックボックス（免除） → bool リスト
+    # チェックボックス -> bool リスト
+    # We expect checkboxes named like "food_exempt[]" in HTML
     def parse_checkbox_list(key: str, length: int) -> list[bool]:
-        raw_list = form.getlist(key)
-        # "true" とか文字列のリストを bool に変換、足りなければ False で補完
-        bool_list = [(v.lower() == "true") for v in raw_list]
+        raw_list = _as_list_from_form(form, key)
+        # common behavior: checked checkboxes send "on" (or value), so treat truthy strings as True
+        bool_list = []
+        for v in raw_list:
+            if isinstance(v, bool):
+                bool_list.append(v)
+            else:
+                vs = str(v).lower()
+                bool_list.append(vs in ("on", "true", "1"))
+        # pad to length
         while len(bool_list) < length:
             bool_list.append(False)
         return bool_list[:length]
@@ -57,5 +89,4 @@ def parse_form(form) -> InputData:
         food_exempt=food_exempt,
         transport_exempt=transport_exempt,
         camp_exempt=camp_exempt,
-
     )
