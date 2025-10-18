@@ -10,7 +10,6 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 @app.route("/", methods=["GET"])
 def index():
-    # 初期値
     initial_people = 4
     return render_template(
         "index.html",
@@ -48,8 +47,11 @@ def calculate():
             results=None
         )
 
+    # 計算
     results_raw = calculate_costs(data)
     results = format_results(results_raw)
+
+    # 計算後もチェック状態を保持して返す
     return render_template(
         "index.html",
         results=results,
