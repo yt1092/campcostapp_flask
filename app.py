@@ -37,9 +37,9 @@ def calculate():
             "index.html",
             errors=errors,
             form_people=data.people,
-            form_food=data.food,
-            form_transport=data.transport,
-            form_camp=data.camp,
+            form_food=int(data.food),
+            form_transport=int(data.transport),
+            form_camp=int(data.camp),
             form_names=data.names,
             form_food_exempt=data.food_exempt,
             form_transport_exempt=data.transport_exempt,
@@ -63,4 +63,5 @@ def calculate():
 if __name__ == "__main__":
 
     app.run(host='0.0.0.0', port=port)
+
 
