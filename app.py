@@ -1,77 +1,53 @@
 from flask import Flask, render_template, request
-from calc.input_handler import parse_form
-from calc.validator import validate_input
-from calc.calculator import calculate_costs
-from calc.formatter import format_results
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 
-
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template(
-        "index.html",
-        form_names=[],
-        form_people=4,
-        form_food=10000,
-        form_transport=8000,
-        form_camp=12000,
-        form_food_exempt=[],
-        form_transport_exempt=[],
-        form_camp_exempt=[],
-        results=[],
-        errors=[]
-    )
+    # 初期値
+    food_cost = 0
+    transport_cost = 0
+    camp_cost = 0
+    members = [
+        {"name": "メンバー1", "food": False, "transport": False, "camp": False},
+        {"name": "メンバー2", "food": False, "transport": False, "camp": False},
+        {"name": "メンバー3", "food": False, "transport": False, "camp": False},
+    ]
+    results = []
 
+    if request.method == "POST":
+        # 入力された金額を整数として取得
+        food_cost = int(float(request.form.get("food_cost", 0)))
+        transport_cost = int(float(request.form.get("transport_cost", 0)))
+        camp_cost = int(float(request.form.get("camp_cost", 0)))
 
-@app.route("/calculate", methods=["POST"])
-def calculate():
-    form = request.form
-    data = parse_form(form)
+        # 免除状態を受け取り
+        for i, member in enumerate(members):
+            member["food"] = f"food_exempt_{i}" in request.form
+            member["transport"] = f"transport_exempt_{i}" in request.form
+            member["camp"] = f"camp_exempt_{i}" in request.form
 
-    # 小数(.0)除去
-    try:
-        data.food = int(float(data.food))
-        data.transport = int(float(data.transport))
-        data.camp = int(float(data.camp))
-    except ValueError:
-        pass
-
-    errors = validate_input(data)
-    if errors:
-        return render_template(
-            "index.html",
-            errors=errors,
-            form_people=data.people,
-            form_food=data.food,
-            form_transport=data.transport,
-            form_camp=data.camp,
-            form_names=data.names,
-            form_food_exempt=data.food_exempt,
-            form_transport_exempt=data.transport_exempt,
-            form_camp_exempt=data.camp_exempt,
-            results=[]
-        )
-
-    results_raw = calculate_costs(data)
-    results = format_results(results_raw)
+        # 各メンバーの支払額を計算
+        active_members = len(members)
+        for member in members:
+            total = 0
+            if not member["food"]:
+                total += food_cost / active_members
+            if not member["transport"]:
+                total += transport_cost / active_members
+            if not member["camp"]:
+                total += camp_cost / active_members
+            results.append(int(total))  # 小数点なし
 
     return render_template(
         "index.html",
+        food_cost=food_cost,
+        transport_cost=transport_cost,
+        camp_cost=camp_cost,
+        members=members,
         results=results,
-        errors=[],
-        form_people=data.people,
-        form_food=data.food,
-        form_transport=data.transport,
-        form_camp=data.camp,
-        form_names=data.names,
-        form_food_exempt=data.food_exempt,
-        form_transport_exempt=data.transport_exempt,
-        form_camp_exempt=data.camp_exempt,
     )
 
 
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host="0.0.0.0", port=10000, debug=True)
