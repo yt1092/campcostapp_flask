@@ -36,26 +36,24 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
   }
 }
 
-// 人数入力直接変更
 document.getElementById('people').addEventListener('input', (e) => {
-  initMembers(e.target.value);
+  initMembers(parseInt(e.target.value) || 1);
 });
 
-// ＋ボタン
 document.getElementById('add-person').addEventListener('click', () => {
   const input = document.getElementById('people');
-  input.value = parseInt(input.value) + 1;
-  initMembers(input.value);
+  input.value = parseInt(input.value || "0") + 1;
+  initMembers(parseInt(input.value));
 });
 
-// －ボタン
 document.getElementById('remove-person').addEventListener('click', () => {
   const input = document.getElementById('people');
-  input.value = Math.max(1, parseInt(input.value) - 1);
-  initMembers(input.value);
+  input.value = Math.max(1, parseInt(input.value || "0") - 1);
+  initMembers(parseInt(input.value));
 });
 
 document.getElementById('people').addEventListener('input', (e) => {
   initMembers(e.target.value);
 
 });
+
