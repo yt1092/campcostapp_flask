@@ -1,74 +1,72 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>キャンプ費用計算ツール</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <title>キャンプ費用計算</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
   <div class="container py-4">
-    <h1 class="text-center mb-4">キャンプ費用計算ツール</h1>
+    <h2>キャンプ費用計算</h2>
 
-    <form method="post" class="card p-4 shadow-sm">
-      <div class="mb-3">
-        <label class="form-label fw-bold">食費</label>
-        <input type="number" name="food" class="form-control" value="{{ food }}" required>
+    {% if errors %}
+      <div class="alert alert-danger">
+        <ul>
+        {% for e in errors %}
+          <li>{{ e }}</li>
+        {% endfor %}
+        </ul>
       </div>
-      <div class="mb-3">
-        <label class="form-label fw-bold">交通費</label>
-        <input type="number" name="transport" class="form-control" value="{{ transport }}" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label fw-bold">キャンプ場代</label>
-        <input type="number" name="camp" class="form-control" value="{{ camp }}" required>
-      </div>
+    {% endif %}
 
-      <div class="mb-3">
-        <label class="form-label fw-bold">人数</label>
-        <input type="number" name="people" class="form-control" value="{{ people }}" min="1" max="10" required>
-      </div>
-
-      <hr>
-      <h5>メンバー設定</h5>
-
-      {% for i in range(people) %}
-      <div class="card mb-2 p-3">
-        <div class="row">
-          <div class="col-md-3 mb-2">
-            <input type="text" name="name_{{ i }}" class="form-control" value="{{ names[i] }}">
-          </div>
-          <div class="col-md-3 form-check">
-            <input type="checkbox" name="food_exempt_{{ i }}" class="form-check-input" id="food_ex_{{ i }}" {% if food_ex[i] %}checked{% endif %}>
-            <label for="food_ex_{{ i }}" class="form-check-label">食費免除</label>
-          </div>
-          <div class="col-md-3 form-check">
-            <input type="checkbox" name="transport_exempt_{{ i }}" class="form-check-input" id="trans_ex_{{ i }}" {% if transport_ex[i] %}checked{% endif %}>
-            <label for="trans_ex_{{ i }}" class="form-check-label">交通費免除</label>
-          </div>
-          <div class="col-md-3 form-check">
-            <input type="checkbox" name="camp_exempt_{{ i }}" class="form-check-input" id="camp_ex_{{ i }}" {% if camp_ex[i] %}checked{% endif %}>
-            <label for="camp_ex_{{ i }}" class="form-check-label">キャンプ場代免除</label>
+    <form method="post" action="/calculate">
+      <div class="row g-2 mb-2">
+        <div class="col-2">
+          <label class="form-label">人数</label>
+          <input id="people" name="people" type="number" class="form-control" value="{{ form_people }}" min="1" max="100">
+          <div class="d-flex mt-1">
+            <button type="button" class="btn btn-outline-primary me-1" id="add-person">＋</button>
+            <button type="button" class="btn btn-outline-danger" id="remove-person">−</button>
           </div>
         </div>
+        <div class="col">
+          <label class="form-label">食費 (円)</label>
+          <input name="food" type="number" class="form-control" value="{{ form_food }}">
+        </div>
+        <div class="col">
+          <label class="form-label">交通費 (円)</label>
+          <input name="transport" type="number" class="form-control" value="{{ form_transport }}">
+        </div>
+        <div class="col">
+          <label class="form-label">キャンプ場 (円)</label>
+          <input name="camp" type="number" class="form-control" value="{{ form_camp }}">
+        </div>
       </div>
-      {% endfor %}
 
-      <button type="submit" class="btn btn-primary w-100 mt-3">計算する</button>
+      <div id="members"></div>
+
+      <button class="btn btn-success mt-3" type="submit">計算する</button>
     </form>
 
     {% if results %}
-    <div class="card p-4 mt-4 shadow-sm">
-      <h4 class="mb-3">結果</h4>
-      <ul class="list-group">
-        {% for i in range(people) %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          {{ names[i] }}
-          <span class="fw-bold">{{ results[i] }} 円</span>
-        </li>
+      <hr>
+      <h4>計算結果</h4>
+      <ul class="list-unstyled">
+        {% for r in results %}
+          <li>{{ r }}</li>
         {% endfor %}
       </ul>
-    </div>
     {% endif %}
   </div>
+
+  <script src="/static/script.js"></script>
+  <script>
+  const initialPeople = {{ form_people }};
+  const initialNames = {{ form_names|tojson }};
+  const initialFoodExempt = {{ form_food_exempt|tojson }};
+  const initialTransportExempt = {{ form_transport_exempt|tojson }};
+  const initialCampExempt = {{ form_camp_exempt|tojson }};
+  initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
+  </script>
 </body>
 </html>
