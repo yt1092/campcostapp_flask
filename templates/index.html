@@ -1,57 +1,100 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>費用計算アプリ</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input[type="number"] { width: 100px; }
-    table { border-collapse: collapse; margin-top: 15px; }
-    td, th { border: 1px solid #999; padding: 8px; text-align: center; }
-    .center { text-align: center; }
-  </style>
+    <meta charset="UTF-8">
+    <title>メンバー登録</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"], input[type="number"] {
+            width: 60%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        hr {
+            margin: 20px 0;
+        }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        li {
+            background: #eef4ff;
+            margin: 6px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+    </style>
 </head>
 <body>
-  <h2>費用計算アプリ</h2>
+<div class="container">
+    <h1>メンバー登録フォーム</h1>
 
-  <form method="POST">
-    <p>食費: <input type="number" name="food_cost" value="{{ '{:,}'.format(food_cost) }}" step="1"></p>
-    <p>交通費: <input type="number" name="transport_cost" value="{{ '{:,}'.format(transport_cost) }}" step="1"></p>
-    <p>キャンプ場代: <input type="number" name="camp_cost" value="{{ '{:,}'.format(camp_cost) }}" step="1"></p>
+    <form method="post">
+        <label>人数：</label>
+        <input type="number" name="count" min="1" value="{{ count }}">
+        <button type="submit">人数を変更</button>
 
-    <table>
-      <tr>
-        <th>メンバー</th>
-        <th>食費免除</th>
-        <th>交通費免除</th>
-        <th>キャンプ免除</th>
-      </tr>
-      {% for member in members %}
-      <tr>
-        <td>{{ member.name }}</td>
-        <td><input type="checkbox" name="food_exempt_{{ loop.index0 }}" {% if member.food %}checked{% endif %}></td>
-        <td><input type="checkbox" name="transport_exempt_{{ loop.index0 }}" {% if member.transport %}checked{% endif %}></td>
-        <td><input type="checkbox" name="camp_exempt_{{ loop.index0 }}" {% if member.camp %}checked{% endif %}></td>
-      </tr>
-      {% endfor %}
-    </table>
+        <hr>
 
-    <div class="center">
-      <button type="submit">計算する</button>
-    </div>
-  </form>
+        {% for i in range(count) %}
+        <div>
+            <label>メンバー {{ loop.index }}：</label>
+            <input type="text" name="member{{ loop.index0 }}" value="{{ members[loop.index0] if members|length > loop.index0 }}">
+        </div>
+        {% endfor %}
 
-  {% if results %}
-  <h3>結果</h3>
-  <table>
-    <tr><th>メンバー</th><th>支払額</th></tr>
-    {% for result in results %}
-      <tr>
-        <td>{{ members[loop.index0].name }}</td>
-        <td>{{ "{:,}".format(result) }} 円</td>
-      </tr>
-    {% endfor %}
-  </table>
-  {% endif %}
+        <button type="submit">送信</button>
+    </form>
+
+    {% if members %}
+    <hr>
+    <h2>登録メンバー一覧</h2>
+    <ul>
+        {% for member in members %}
+        <li>{{ loop.index }}. {{ member }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
 </body>
 </html>
