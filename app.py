@@ -8,10 +8,9 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 @app.route("/", methods=["GET"])
 def index():
-    # 初期表示（空のフォーム）
     return render_template(
         "index.html",
-        form_names=[],             # ← デフォルトで空リスト
+        form_names=[],
         form_people=4,
         form_food=10000,
         form_transport=8000,
@@ -23,10 +22,17 @@ def index():
     )
 @app.route("/calculate", methods=["POST"])
 def calculate():
-    data = parse_form(request.form)
+    form = request.form
+    cleaned = {}
+    for k, v in form.items():
+        if k in ["food", "transport", "camp"]:
+            cleaned[k] = v.replace(",", "")
+        else:
+            cleaned[k] = v
+
+    data = parse_form(cleaned)
     errors = validate_input(data)
     if errors:
-        # フォームの入力をテンプレートに戻すために簡易的に値を渡す
         return render_template(
             "index.html",
             errors=errors,
@@ -57,3 +63,4 @@ def calculate():
 if __name__ == "__main__":
 
     app.run(host='0.0.0.0', port=port)
+
