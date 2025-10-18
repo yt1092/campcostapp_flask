@@ -26,12 +26,12 @@
         <th>交通費免除</th>
         <th>キャンプ免除</th>
       </tr>
-      {% for i, member in enumerate(members) %}
+      {% for member in members %}
       <tr>
         <td>{{ member.name }}</td>
-        <td><input type="checkbox" name="food_exempt_{{ i }}" {% if member.food %}checked{% endif %}></td>
-        <td><input type="checkbox" name="transport_exempt_{{ i }}" {% if member.transport %}checked{% endif %}></td>
-        <td><input type="checkbox" name="camp_exempt_{{ i }}" {% if member.camp %}checked{% endif %}></td>
+        <td><input type="checkbox" name="food_exempt_{{ loop.index0 }}" {% if member.food %}checked{% endif %}></td>
+        <td><input type="checkbox" name="transport_exempt_{{ loop.index0 }}" {% if member.transport %}checked{% endif %}></td>
+        <td><input type="checkbox" name="camp_exempt_{{ loop.index0 }}" {% if member.camp %}checked{% endif %}></td>
       </tr>
       {% endfor %}
     </table>
@@ -45,9 +45,9 @@
   <h3>結果</h3>
   <table>
     <tr><th>メンバー</th><th>支払額</th></tr>
-    {% for i, result in enumerate(results) %}
+    {% for result in results %}
       <tr>
-        <td>{{ members[i].name }}</td>
+        <td>{{ members[loop.index0].name }}</td>
         <td>{{ "{:,}".format(result) }} 円</td>
       </tr>
     {% endfor %}
