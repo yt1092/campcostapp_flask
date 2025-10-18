@@ -6,6 +6,7 @@ from calc.formatter import format_results
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template(
@@ -22,24 +23,10 @@ def index():
     )
 
 
-    results_raw = calculate_costs(data)
-    results = format_results(results_raw)
-    return render_template(
-        "index.html",
-        results=results,
-        form_people=data.people,
-        form_food=data.food,
-        form_transport=data.transport,
-        form_camp=data.camp,
-        form_names=data.names,
-        form_food_exempt=data.food_exempt,
-        form_transport_exempt=data.transport_exempt,
-        form_camp_exempt=data.camp_exempt,
-    )
 @app.route("/calculate", methods=["POST"])
 def calculate():
     form = request.form  # ImmutableMultiDict
-    data = parse_form(form)  # ← dict に変換せずそのまま渡す
+    data = parse_form(form)  # InputData に変換
 
     errors = validate_input(data)
     if errors:
@@ -51,9 +38,9 @@ def calculate():
             form_transport=data.transport,
             form_camp=data.camp,
             form_names=data.names,
-            form_food_exempt=data.food_exempt,
-            form_transport_exempt=data.transport_exempt,
-            form_camp_exempt=data.camp_exempt,
+            form_food_exempt=[bool(x) for x in data.food_exempt],
+            form_transport_exempt=[bool(x) for x in data.transport_exempt],
+            form_camp_exempt=[bool(x) for x in data.camp_exempt],
         )
 
     results_raw = calculate_costs(data)
@@ -66,28 +53,13 @@ def calculate():
         form_transport=data.transport,
         form_camp=data.camp,
         form_names=data.names,
-        form_food_exempt=data.food_exempt,
-        form_transport_exempt=data.transport_exempt,
-        form_camp_exempt=data.camp_exempt,
+        form_food_exempt=[bool(x) for x in data.food_exempt],
+        form_transport_exempt=[bool(x) for x in data.transport_exempt],
+        form_camp_exempt=[bool(x) for x in data.camp_exempt],
     )
-    results_raw = calculate_costs(data)
-    results = format_results(results_raw)
-    return render_template(
-        "index.html",
-        results=results,
-        form_people=data.people,
-        form_food=data.food,
-        form_transport=data.transport,
-        form_camp=data.camp,
-        form_names=data.names,
-        form_food_exempt=data.food_exempt,
-        form_transport_exempt=data.transport_exempt,
-        form_camp_exempt=data.camp_exempt,
-    )
+
+
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=True)
-
-
-
