@@ -38,4 +38,13 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
 
 document.getElementById('people').addEventListener('input', (e) => {
   initMembers(e.target.value);
+  
+function changePeople(delta) {
+  const peopleInput = document.getElementById('people');
+  let current = parseInt(peopleInput.value) || 1;
+  current = Math.min(100, Math.max(1, current + delta));
+  peopleInput.value = current;
+  initMembers(current);
+}
+  
 });
