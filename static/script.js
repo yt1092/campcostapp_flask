@@ -1,67 +1,74 @@
-function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transportEx=false, campEx=false) {
-  return `
-    <div class="border p-2 mb-2 rounded">
-      <label class="form-label">メンバー ${i+1} 名前</label>
-      <input class="form-control mb-2" name="name_${i}" value="${name}">
-      <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" name="food_exempt[]" ${foodEx ? 'checked' : ''}>
-        <label class="form-check-label">食費免除</label>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>キャンプ費用計算</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h2>キャンプ費用計算</h2>
+
+    {% if errors %}
+      <div class="alert alert-danger">
+        <ul>
+        {% for e in errors %}
+          <li>{{ e }}</li>
+        {% endfor %}
+        </ul>
       </div>
-      <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" name="transport_exempt[]" ${transportEx ? 'checked' : ''}>
-        <label class="form-check-label">交通免除</label>
+    {% endif %}
+
+    <form method="post" action="/calculate">
+      <div class="row g-2 mb-2">
+        <div class="col-2">
+          <label class="form-label">人数</label>
+          <input id="people" name="people" type="number" class="form-control" value="{{ form_people or 4 }}" min="1" max="100" step="1">
+          <div class="d-flex mt-1">
+            <button type="button" class="btn btn-outline-primary me-1" id="add-person">＋</button>
+            <button type="button" class="btn btn-outline-danger" id="remove-person">−</button>
+          </div>
+        </div>
+        <div class="col">
+          <label class="form-label">食費 (円)</label>
+          <input name="food" type="text" inputmode="numeric" class="form-control" value="{{ form_food or '10,000' }}">
+        </div>
+        <div class="col">
+          <label class="form-label">交通費 (円)</label>
+          <input name="transport" type="text" inputmode="numeric" class="form-control" value="{{ form_transport or '8,000' }}">
+        </div>
+        <div class="col">
+          <label class="form-label">キャンプ場 (円)</label>
+          <input name="camp" type="text" inputmode="numeric" class="form-control" value="{{ form_camp or '12,000' }}">
+        </div>
       </div>
-      <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" name="camp_exempt[]" ${campEx ? 'checked' : ''}>
-        <label class="form-check-label">キャンプ免除</label>
-      </div>
-    </div>
-  `;
-}
 
-function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
-  const container = document.getElementById('members');
-  container.innerHTML = '';
-  n = Math.max(1, Math.min(100, parseInt(n || 1)));
-  for (let i = 0; i < n; i++) {
-    const name = names[i] || `メンバー${i+1}`;
-    const f = !!foodEx[i];
-    const t = !!transportEx[i];
-    const c = !!campEx[i];
-    container.insertAdjacentHTML('beforeend', buildMemberHTML(i, name, f, t, c));
-  }
-}
+      <div id="members"></div>
 
-// 現在のチェック状態と名前を取得
-function getCurrentStates() {
-  const container = document.getElementById('members');
-  const names = [], foodEx = [], transportEx = [], campEx = [];
-  container.querySelectorAll('div.border').forEach((div, i) => {
-    names.push(div.querySelector(`input[name="name_${i}"]`).value);
-    foodEx.push(div.querySelector(`input[name="food_exempt[]"]`).checked);
-    transportEx.push(div.querySelector(`input[name="transport_exempt[]"]`).checked);
-    campEx.push(div.querySelector(`input[name="camp_exempt[]"]`).checked);
-  });
-  return { names, foodEx, transportEx, campEx };
-}
+      <button class="btn btn-success mt-3" type="submit">計算する</button>
+    </form>
 
-// メンバーを再描画（現在の状態を保持）
-function updateMembers(n) {
-  const states = getCurrentStates();
-  initMembers(n, states.names, states.foodEx, states.transportEx, states.campEx);
-}
+    {% if results %}
+      <hr>
+      <h4>計算結果</h4>
+      <ul class="list-unstyled">
+        {% for r in results %}
+          <li>{{ r }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
 
-// イベント設定
-document.getElementById('people').addEventListener('input', (e) => {
-  updateMembers(parseInt(e.target.value) || 1);
-});
-document.getElementById('add-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = parseInt(input.value || "0") + 1;
-  updateMembers(parseInt(input.value));
-});
-document.getElementById('remove-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = Math.max(1, parseInt(input.value || "0") - 1);
-  updateMembers(parseInt(input.value));
-});
+  <script src="/static/script.js"></script>
+  <script>
+  // 必ず配列で渡す（デフォルトは空配列）
+  const initialPeople = {{ form_people or 4 }};
+  const initialNames = {{ form_names|tojson(default=[]) }};
+  const initialFoodExempt = {{ form_food_exempt|tojson(default=[]) }};
+  const initialTransportExempt = {{ form_transport_exempt|tojson(default=[]) }};
+  const initialCampExempt = {{ form_camp_exempt|tojson(default=[]) }};
+
+  initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
+  </script>
+</body>
+</html>
