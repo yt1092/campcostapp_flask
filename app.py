@@ -7,6 +7,7 @@ import os
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
+
 @app.route("/", methods=["GET"])
 def index():
     initial_people = 4
@@ -29,9 +30,11 @@ def index():
         errors=[]
     )
 
+
 @app.route("/calculate", methods=["POST"])
 def calculate():
     data = parse_form(request.form)
+
     errors = validate_input(data)
     if errors:
         return render_template(
@@ -49,16 +52,7 @@ def calculate():
         )
 
     results_raw = calculate_costs(data)
-    results = []
-    for i, r in enumerate(results_raw):
-        line = f"{data.names[i]}: {r}円"
-        if data.food_exempt[i]:
-            line += "（食費免除）"
-        if data.transport_exempt[i]:
-            line += "（交通免除）"
-        if data.camp_exempt[i]:
-            line += "（キャンプ免除）"
-        results.append(line)
+    results = format_results(results_raw)
 
     return render_template(
         "index.html",
@@ -73,6 +67,7 @@ def calculate():
         form_transport_exempt=[bool(x) for x in data.transport_exempt],
         form_camp_exempt=[bool(x) for x in data.camp_exempt],
     )
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
