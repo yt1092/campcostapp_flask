@@ -8,7 +8,6 @@
   <style>
     body { background-color: #f8f9fa; }
     .container { max-width: 1000px; margin-top: 24px; }
-    .member-card { background: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
     .small-input { max-width: 160px; }
   </style>
 </head>
@@ -26,7 +25,7 @@
       </div>
     {% endif %}
 
-    <form id="main-form" method="post" action="/calculate" novalidate>
+    <form id="main-form" method="post" action="/calculate">
       <div class="card p-3 mb-3">
         <div class="row g-2 align-items-end">
           <div class="col-2">
@@ -40,15 +39,15 @@
 
           <div class="col">
             <label class="form-label">食費 (円)</label>
-            <input id="food-input" name="food" type="text" class="form-control small-input" value="{{ "{:,}".format(form_food) }}">
+            <input name="food" type="text" class="form-control small-input" value="{{ form_food|int }}">
           </div>
           <div class="col">
             <label class="form-label">交通費 (円)</label>
-            <input id="transport-input" name="transport" type="text" class="form-control small-input" value="{{ "{:,}".format(form_transport) }}">
+            <input name="transport" type="text" class="form-control small-input" value="{{ form_transport|int }}">
           </div>
           <div class="col">
             <label class="form-label">キャンプ場 (円)</label>
-            <input id="camp-input" name="camp" type="text" class="form-control small-input" value="{{ "{:,}".format(form_camp) }}">
+            <input name="camp" type="text" class="form-control small-input" value="{{ form_camp|int }}">
           </div>
         </div>
       </div>
@@ -73,15 +72,11 @@
     window.initialData = {
       form_people: {{ form_people }},
       form_names: {{ form_names|tojson }},
-      form_food: {{ form_food }},
-      form_transport: {{ form_transport }},
-      form_camp: {{ form_camp }},
       form_food_exempt: {{ form_food_exempt|tojson }},
       form_transport_exempt: {{ form_transport_exempt|tojson }},
       form_camp_exempt: {{ form_camp_exempt|tojson }}
     };
   </script>
-
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
