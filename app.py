@@ -34,7 +34,6 @@ def index():
 @app.route("/calculate", methods=["POST"])
 def calculate():
     data = parse_form(request.form)
-
     errors = validate_input(data)
     if errors:
         return render_template(
@@ -52,7 +51,7 @@ def calculate():
         )
 
     results_raw = calculate_costs(data)
-    results = format_results(results_raw)  # as_integer引数は削除
+    results = format_results(results_raw, as_integer=True)  # 整数・カンマ付き表示対応
 
     return render_template(
         "index.html",
