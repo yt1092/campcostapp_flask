@@ -50,22 +50,21 @@ function updateMembers(n) {
   initMembers(n, states.names, states.foodEx, states.transportEx, states.campEx);
 }
 
-document.getElementById('people').addEventListener('input', (e) => {
-  updateMembers(parseInt(e.target.value) || 1);
-});
-document.getElementById('add-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = parseInt(input.value || "0") + 1;
-  updateMembers(parseInt(input.value));
-});
-document.getElementById('remove-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = Math.max(1, parseInt(input.value || "0") - 1);
-  updateMembers(parseInt(input.value));
-});
-
-// 初期表示
 document.addEventListener('DOMContentLoaded', () => {
   const data = window.initialData;
   initMembers(data.form_people, data.form_names, data.form_food_exempt, data.form_transport_exempt, data.form_camp_exempt);
+
+  document.getElementById('people').addEventListener('input', (e) => {
+    updateMembers(parseInt(e.target.value) || 1);
+  });
+  document.getElementById('add-person').addEventListener('click', () => {
+    const input = document.getElementById('people');
+    input.value = parseInt(input.value || "0") + 1;
+    updateMembers(parseInt(input.value));
+  });
+  document.getElementById('remove-person').addEventListener('click', () => {
+    const input = document.getElementById('people');
+    input.value = Math.max(1, parseInt(input.value || "0") - 1);
+    updateMembers(parseInt(input.value));
+  });
 });
