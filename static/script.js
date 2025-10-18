@@ -1,7 +1,3 @@
-function checkboxChecked(arr, i) {
-  return Array.isArray(arr) && arr[i] === true;
-}
-
 function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transportEx=false, campEx=false) {
   return `
     <div class="border p-2 mb-2 rounded">
@@ -36,24 +32,42 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
   }
 }
 
+// 現在の状態を取得
+function getCurrentStates() {
+  const names = [];
+  const foodEx = [];
+  const transportEx = [];
+  const campEx = [];
+  
+  const members = document.querySelectorAll('#members > div');
+  members.forEach((div, i) => {
+    names.push(div.querySelector(`input[name="name_${i}"]`).value);
+    foodEx.push(div.querySelector(`input[name="food_exempt[]"]`).checked);
+    transportEx.push(div.querySelector(`input[name="transport_exempt[]"]`).checked);
+    campEx.push(div.querySelector(`input[name="camp_exempt[]"]`).checked);
+  });
+  
+  return {names, foodEx, transportEx, campEx};
+}
+
+// 人数入力直接変更
 document.getElementById('people').addEventListener('input', (e) => {
-  initMembers(parseInt(e.target.value) || 1);
+  const current = getCurrentStates();
+  initMembers(e.target.value, current.names, current.foodEx, current.transportEx, current.campEx);
 });
 
+// ＋ボタン
 document.getElementById('add-person').addEventListener('click', () => {
   const input = document.getElementById('people');
-  input.value = parseInt(input.value || "0") + 1;
-  initMembers(parseInt(input.value));
+  const current = getCurrentStates();
+  input.value = parseInt(input.value) + 1;
+  initMembers(input.value, current.names, current.foodEx, current.transportEx, current.campEx);
 });
 
+// －ボタン
 document.getElementById('remove-person').addEventListener('click', () => {
   const input = document.getElementById('people');
-  input.value = Math.max(1, parseInt(input.value || "0") - 1);
-  initMembers(parseInt(input.value));
+  const current = getCurrentStates();
+  input.value = Math.max(1, parseInt(input.value) - 1);
+  initMembers(input.value, current.names, current.foodEx, current.transportEx, current.campEx);
 });
-
-document.getElementById('people').addEventListener('input', (e) => {
-  initMembers(e.target.value);
-
-});
-
