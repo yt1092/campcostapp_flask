@@ -20,7 +20,7 @@ function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transport
 }
 
 function normalizeBool(val) {
-  return val === true || val === "true" || val === 1 || val === "1";
+  return val === true || val === "true" || val === 1;
 }
 
 function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
@@ -30,9 +30,9 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
 
   for (let i = 0; i < n; i++) {
     const name = names[i] || `メンバー${i+1}`;
-    const f = normalizeBool(foodEx[i]);
-    const t = normalizeBool(transportEx[i]);
-    const c = normalizeBool(campEx[i]);
+    const f = foodEx[i] !== undefined ? normalizeBool(foodEx[i]) : false;
+    const t = transportEx[i] !== undefined ? normalizeBool(transportEx[i]) : false;
+    const c = campEx[i] !== undefined ? normalizeBool(campEx[i]) : false;
     container.insertAdjacentHTML('beforeend', buildMemberHTML(i, name, f, t, c));
   }
 }
@@ -56,20 +56,7 @@ function updateMembers(n) {
 
 document.addEventListener('DOMContentLoaded', () => {
   const d = window.initialData || {};
-  const people = d.form_people || 1;
-  const names = Array.isArray(d.form_names) ? d.form_names : [];
-  const foodEx = Array.isArray(d.form_food_exempt) ? d.form_food_exempt.map(normalizeBool) : [];
-  const transportEx = Array.isArray(d.form_transport_exempt) ? d.form_transport_exempt.map(normalizeBool) : [];
-  const campEx = Array.isArray(d.form_camp_exempt) ? d.form_camp_exempt.map(normalizeBool) : [];
-  initMembers(people, names, foodEx, transportEx, campEx);
-
-  const form = document.getElementById('main-form');
-  form.addEventListener('submit', (e) => {
-    ['food', 'transport', 'camp'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = el.value.replace(/,/g,'');
-    });
-  });
+  initMembers(d.form_people, d.form_names, d.form_food_exempt, d.form_transport_exempt, d.form_camp_exempt);
 });
 
 document.getElementById('people').addEventListener('input', (e) => {
