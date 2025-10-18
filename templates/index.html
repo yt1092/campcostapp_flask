@@ -23,7 +23,11 @@
       <div class="row g-2 mb-2">
         <div class="col-2">
           <label class="form-label">人数</label>
-          <input id="people" name="people" type="number" class="form-control" value="{{ form_people or 4 }}" min="1" max="100">
+          <div class="input-group">
+            <button type="button" class="btn btn-outline-secondary" onclick="changePeople(-1)">−</button>
+            <input id="people" name="people" type="number" class="form-control text-center" value="{{ form_people or 1 }}" min="1" max="100">
+            <button type="button" class="btn btn-outline-secondary" onclick="changePeople(1)">＋</button>
+          </div>
         </div>
         <div class="col">
           <label class="form-label">食費 (円)</label>
@@ -66,4 +70,5 @@
     initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
   </script>
 </body>
+
 </html>
