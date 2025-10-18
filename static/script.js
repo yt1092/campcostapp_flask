@@ -1,6 +1,6 @@
 function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transportEx=false, campEx=false) {
   return `
-    <div class="member-card">
+    <div class="border p-2 mb-2 rounded">
       <label class="form-label">メンバー ${i+1} 名前</label>
       <input class="form-control mb-2" name="name_${i}" value="${name}">
       <div class="form-check form-check-inline">
@@ -34,37 +34,3 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
 }
 
 function getCurrentStates() {
-  const container = document.getElementById('members');
-  const names = [], foodEx = [], transportEx = [], campEx = [];
-  container.querySelectorAll('.member-card').forEach((div, i) => {
-    names.push(div.querySelector(`input[name="name_${i}"]`).value);
-    foodEx.push(div.querySelector(`input[name="food_exempt[${i}]"]`).checked);
-    transportEx.push(div.querySelector(`input[name="transport_exempt[${i}]"]`).checked);
-    campEx.push(div.querySelector(`input[name="camp_exempt[${i}]"]`).checked);
-  });
-  return { names, foodEx, transportEx, campEx };
-}
-
-function updateMembers(n) {
-  const states = getCurrentStates();
-  initMembers(n, states.names, states.foodEx, states.transportEx, states.campEx);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const data = window.initialData;
-  initMembers(data.form_people, data.form_names, data.form_food_exempt, data.form_transport_exempt, data.form_camp_exempt);
-
-  document.getElementById('people').addEventListener('input', (e) => {
-    updateMembers(parseInt(e.target.value) || 1);
-  });
-  document.getElementById('add-person').addEventListener('click', () => {
-    const input = document.getElementById('people');
-    input.value = parseInt(input.value || "0") + 1;
-    updateMembers(parseInt(input.value));
-  });
-  document.getElementById('remove-person').addEventListener('click', () => {
-    const input = document.getElementById('people');
-    input.value = Math.max(1, parseInt(input.value || "0") - 1);
-    updateMembers(parseInt(input.value));
-  });
-});
