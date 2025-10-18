@@ -6,7 +6,6 @@ from calc.formatter import format_results
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-
 @app.route("/", methods=["GET"])
 def index():
     return render_template(
@@ -19,9 +18,9 @@ def index():
         form_food_exempt=[],
         form_transport_exempt=[],
         form_camp_exempt=[],
-        errors=[]
+        errors=[],
+        results=[]
     )
-
 
 @app.route("/calculate", methods=["POST"])
 def calculate():
@@ -38,13 +37,16 @@ def calculate():
             form_transport=data.transport,
             form_camp=data.camp,
             form_names=data.names,
-            form_food_exempt=[bool(x) for x in data.food_exempt],
-            form_transport_exempt=[bool(x) for x in data.transport_exempt],
-            form_camp_exempt=[bool(x) for x in data.camp_exempt],
+            form_food_exempt=data.food_exempt,
+            form_transport_exempt=data.transport_exempt,
+            form_camp_exempt=data.camp_exempt,
+            results=[]
         )
 
     results_raw = calculate_costs(data)
-    results = format_results(results_raw)
+    # 整数にしてカンマ区切りで文字列化
+    results = [f"{r.name}: ¥{int(r.total):,}" for r in results_raw]
+
     return render_template(
         "index.html",
         results=results,
@@ -53,11 +55,11 @@ def calculate():
         form_transport=data.transport,
         form_camp=data.camp,
         form_names=data.names,
-        form_food_exempt=[bool(x) for x in data.food_exempt],
-        form_transport_exempt=[bool(x) for x in data.transport_exempt],
-        form_camp_exempt=[bool(x) for x in data.camp_exempt],
+        form_food_exempt=data.food_exempt,
+        form_transport_exempt=data.transport_exempt,
+        form_camp_exempt=data.camp_exempt,
+        errors=[]
     )
-
 
 if __name__ == "__main__":
     import os
