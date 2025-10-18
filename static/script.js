@@ -19,6 +19,10 @@ function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transport
   `;
 }
 
+function normalizeBool(val) {
+  return val === true || val === "true" || val === 1 || val === "1";
+}
+
 function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
   const container = document.getElementById('members');
   container.innerHTML = '';
@@ -26,9 +30,9 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
 
   for (let i = 0; i < n; i++) {
     const name = names[i] || `メンバー${i+1}`;
-    const f = foodEx[i] === true || foodEx[i] === "true" || foodEx[i] === 1;
-    const t = transportEx[i] === true || transportEx[i] === "true" || transportEx[i] === 1;
-    const c = campEx[i] === true || campEx[i] === "true" || campEx[i] === 1;
+    const f = normalizeBool(foodEx[i]);
+    const t = normalizeBool(transportEx[i]);
+    const c = normalizeBool(campEx[i]);
     container.insertAdjacentHTML('beforeend', buildMemberHTML(i, name, f, t, c));
   }
 }
@@ -54,9 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const d = window.initialData || {};
   const people = d.form_people || 1;
   const names = Array.isArray(d.form_names) ? d.form_names : [];
-  const foodEx = Array.isArray(d.form_food_exempt) ? d.form_food_exempt : [];
-  const transportEx = Array.isArray(d.form_transport_exempt) ? d.form_transport_exempt : [];
-  const campEx = Array.isArray(d.form_camp_exempt) ? d.form_camp_exempt : [];
+  const foodEx = Array.isArray(d.form_food_exempt) ? d.form_food_exempt.map(normalizeBool) : [];
+  const transportEx = Array.isArray(d.form_transport_exempt) ? d.form_transport_exempt.map(normalizeBool) : [];
+  const campEx = Array.isArray(d.form_camp_exempt) ? d.form_camp_exempt.map(normalizeBool) : [];
   initMembers(people, names, foodEx, transportEx, campEx);
 
   const form = document.getElementById('main-form');
@@ -68,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// 人数変更イベント
 document.getElementById('people').addEventListener('input', (e) => {
   updateMembers(parseInt(e.target.value) || 1);
 });
