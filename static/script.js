@@ -1,4 +1,4 @@
-function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transportEx=false, campEx=false) {
+function buildMemberHTML(i, name, foodEx, transportEx, campEx) {
   return `
     <div class="border p-2 mb-2 rounded">
       <label class="form-label">メンバー ${i+1} 名前</label>
@@ -19,16 +19,14 @@ function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transport
   `;
 }
 
-function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
+function initMembers(n, names, foodEx, transportEx, campEx) {
   const container = document.getElementById('members');
   container.innerHTML = '';
-  n = Math.max(1, Math.min(100, parseInt(n || 1)));
-
   for (let i = 0; i < n; i++) {
     const name = names[i] || `メンバー${i+1}`;
-    const f = foodEx[i] === true || foodEx[i] === "true" || foodEx[i] === 1;
-    const t = transportEx[i] === true || transportEx[i] === "true" || transportEx[i] === 1;
-    const c = campEx[i] === true || campEx[i] === "true" || campEx[i] === 1;
+    const f = foodEx[i] === true || foodEx[i] === "true";
+    const t = transportEx[i] === true || transportEx[i] === "true";
+    const c = campEx[i] === true || campEx[i] === "true";
     container.insertAdjacentHTML('beforeend', buildMemberHTML(i, name, f, t, c));
   }
 }
@@ -60,11 +58,4 @@ document.getElementById('add-person').addEventListener('click', () => {
 });
 document.getElementById('remove-person').addEventListener('click', () => {
   const input = document.getElementById('people');
-  input.value = Math.max(1, parseInt(input.value || "0") - 1);
-  updateMembers(parseInt(input.value));
-});
-
-// 初期表示
-document.addEventListener('DOMContentLoaded', () => {
-  initMembers(window.initialData.form_people, window.initialData.form_names, window.initialData.form_food_exempt, window.initialData.form_transport_exempt, window.initialData.form_camp_exempt);
-});
+  input.value = Math.max(1, parseInt(input.value || "0") -
