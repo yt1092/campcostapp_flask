@@ -6,6 +6,7 @@ from calc.formatter import format_results
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template(
@@ -18,14 +19,23 @@ def index():
         form_food_exempt=[],
         form_transport_exempt=[],
         form_camp_exempt=[],
-        errors=[],
-        results=[]
+        results=[],
+        errors=[]
     )
+
 
 @app.route("/calculate", methods=["POST"])
 def calculate():
     form = request.form
     data = parse_form(form)
+
+    # 小数(.0)除去
+    try:
+        data.food = int(float(data.food))
+        data.transport = int(float(data.transport))
+        data.camp = int(float(data.camp))
+    except ValueError:
+        pass
 
     errors = validate_input(data)
     if errors:
@@ -44,12 +54,12 @@ def calculate():
         )
 
     results_raw = calculate_costs(data)
-    # 整数にしてカンマ区切りで文字列化
-    results = [f"{r.name}: ¥{int(r.total):,}" for r in results_raw]
+    results = format_results(results_raw)
 
     return render_template(
         "index.html",
         results=results,
+        errors=[],
         form_people=data.people,
         form_food=data.food,
         form_transport=data.transport,
@@ -58,8 +68,8 @@ def calculate():
         form_food_exempt=data.food_exempt,
         form_transport_exempt=data.transport_exempt,
         form_camp_exempt=data.camp_exempt,
-        errors=[]
     )
+
 
 if __name__ == "__main__":
     import os
