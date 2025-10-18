@@ -1,61 +1,70 @@
 from flask import Flask, render_template, request
+from calc.input_handler import parse_form
+from calc.validator import validate_input
+from calc.calculator import calculate_costs
+from calc.formatter import format_results
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
-@app.route("/", methods=["GET", "POST"])
+
+@app.route("/", methods=["GET"])
 def index():
     # 初期値
-    food = 10000
-    transport = 8000
-    camp = 12000
-    people = 3
-    names = [f"メンバー{i+1}" for i in range(people)]
-    food_ex = [False for _ in range(people)]
-    transport_ex = [False for _ in range(people)]
-    camp_ex = [False for _ in range(people)]
-    results = None
-
-    if request.method == "POST":
-        # フォーム入力を取得
-        food = int(float(request.form.get("food", 0)))
-        transport = int(float(request.form.get("transport", 0)))
-        camp = int(float(request.form.get("camp", 0)))
-        people = int(request.form.get("people", people))
-
-        names = [request.form.get(f"name_{i}", f"メンバー{i+1}") for i in range(people)]
-        food_ex = [request.form.get(f"food_exempt_{i}") == "on" for i in range(people)]
-        transport_ex = [request.form.get(f"transport_exempt_{i}") == "on" for i in range(people)]
-        camp_ex = [request.form.get(f"camp_exempt_{i}") == "on" for i in range(people)]
-
-        # 各費用の人数あたり
-        food_share = food // people
-        transport_share = transport // people
-        camp_share = camp // people
-
-        # 計算
-        results = []
-        for i in range(people):
-            total = 0
-            if not food_ex[i]:
-                total += food_share
-            if not transport_ex[i]:
-                total += transport_share
-            if not camp_ex[i]:
-                total += camp_share
-            results.append(total)
-
+    initial_people = 4
     return render_template(
         "index.html",
-        food=food,
-        transport=transport,
-        camp=camp,
-        people=people,
-        names=names,
-        food_ex=food_ex,
-        transport_ex=transport_ex,
-        camp_ex=camp_ex,
-        results=results,
+        form_names=[f"メンバー{i+1}" for i in range(initial_people)],
+        form_people=initial_people,
+        form_food=10000,
+        form_transport=8000,
+        form_camp=12000,
+        form_food_exempt=[False]*initial_people,
+        form_transport_exempt=[False]*initial_people,
+        form_camp_exempt=[False]*initial_people,
+        results=None,
+        errors=[]
     )
 
+
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    form = request.form
+    data = parse_form(form)
+
+    errors = validate_input(data)
+    if errors:
+        return render_template(
+            "index.html",
+            errors=errors,
+            form_people=data.people,
+            form_food=int(data.food),
+            form_transport=int(data.transport),
+            form_camp=int(data.camp),
+            form_names=data.names,
+            form_food_exempt=[bool(x) for x in data.food_exempt],
+            form_transport_exempt=[bool(x) for x in data.transport_exempt],
+            form_camp_exempt=[bool(x) for x in data.camp_exempt],
+            results=None
+        )
+
+    results_raw = calculate_costs(data)
+    results = format_results(results_raw)
+    return render_template(
+        "index.html",
+        results=results,
+        form_people=data.people,
+        form_food=int(data.food),
+        form_transport=int(data.transport),
+        form_camp=int(data.camp),
+        form_names=data.names,
+        form_food_exempt=[bool(x) for x in data.food_exempt],
+        form_transport_exempt=[bool(x) for x in data.transport_exempt],
+        form_camp_exempt=[bool(x) for x in data.camp_exempt],
+        errors=[]
+    )
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
