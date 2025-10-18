@@ -24,7 +24,12 @@
         <div class="col-2">
           <label class="form-label">人数</label>
           <input id="people" name="people" type="number" class="form-control" value="{{ form_people or 4 }}" min="1" max="100">
+          <div class="col-2 d-flex align-items-end">
+            <button type="button" class="btn btn-outline-primary me-1" id="add-person">＋</button>
+            <button type="button" class="btn btn-outline-danger" id="remove-person">−</button>
+          </div>
         </div>
+        
         <div class="col">
           <label class="form-label">食費 (円)</label>
           <input name="food" type="number" class="form-control" value="{{ form_food or 10000 }}">
@@ -66,4 +71,5 @@
     initMembers(initialPeople, initialNames, initialFoodExempt, initialTransportExempt, initialCampExempt);
   </script>
 </body>
+
 </html>
