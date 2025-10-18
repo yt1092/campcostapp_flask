@@ -8,16 +8,16 @@ function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transport
       <label class="form-label">メンバー ${i+1} 名前</label>
       <input class="form-control mb-2" name="name_${i}" value="${name}">
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" id="foodExempt_${i}" name="foodExempt_${i}" ${foodEx ? 'checked' : ''}>
-        <label class="form-check-label" for="foodExempt_${i}">食費免除</label>
+        <input class="form-check-input" type="checkbox" name="food_exempt[]" ${foodEx ? 'checked' : ''}>
+        <label class="form-check-label">食費免除</label>
       </div>
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" id="transportExempt_${i}" name="transportExempt_${i}" ${transportEx ? 'checked' : ''}>
-        <label class="form-check-label" for="transportExempt_${i}">交通免除</label>
+        <input class="form-check-input" type="checkbox" name="transport_exempt[]" ${transportEx ? 'checked' : ''}>
+        <label class="form-check-label">交通免除</label>
       </div>
       <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" id="campExempt_${i}" name="campExempt_${i}" ${campEx ? 'checked' : ''}>
-        <label class="form-check-label" for="campExempt_${i}">キャンプ免除</label>
+        <input class="form-check-input" type="checkbox" name="camp_exempt[]" ${campEx ? 'checked' : ''}>
+        <label class="form-check-label">キャンプ免除</label>
       </div>
     </div>
   `;
@@ -36,6 +36,26 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
   }
 }
 
+// 人数入力直接変更
 document.getElementById('people').addEventListener('input', (e) => {
   initMembers(e.target.value);
+});
+
+// ＋ボタン
+document.getElementById('add-person').addEventListener('click', () => {
+  const input = document.getElementById('people');
+  input.value = parseInt(input.value) + 1;
+  initMembers(input.value);
+});
+
+// －ボタン
+document.getElementById('remove-person').addEventListener('click', () => {
+  const input = document.getElementById('people');
+  input.value = Math.max(1, parseInt(input.value) - 1);
+  initMembers(input.value);
+});
+
+document.getElementById('people').addEventListener('input', (e) => {
+  initMembers(e.target.value);
+
 });
