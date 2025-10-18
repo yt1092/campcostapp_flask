@@ -44,9 +44,9 @@ def parse_form(form) -> InputData:
             bool_list.append(False)
         return bool_list[:length]
 
-    food_exempt = parse_checkbox_list("food_exempt", people)
-    transport_exempt = parse_checkbox_list("transport_exempt", people)
-    camp_exempt = parse_checkbox_list("camp_exempt", people)
+    food_exempt = parse_checkbox_list("food_exempt[]", people)
+    transport_exempt = parse_checkbox_list("transport_exempt[]", people)
+    camp_exempt = parse_checkbox_list("camp_exempt[]", people)
 
     return InputData(
         people=people,
@@ -57,4 +57,5 @@ def parse_form(form) -> InputData:
         food_exempt=food_exempt,
         transport_exempt=transport_exempt,
         camp_exempt=camp_exempt,
+
     )
