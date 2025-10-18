@@ -32,7 +32,7 @@ function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
   }
 }
 
-// 現在のチェック状態を保持
+// 現在のチェック状態と名前を取得
 function getCurrentStates() {
   const container = document.getElementById('members');
   const names = [], foodEx = [], transportEx = [], campEx = [];
@@ -45,6 +45,7 @@ function getCurrentStates() {
   return { names, foodEx, transportEx, campEx };
 }
 
+// メンバーを再描画（現在の状態を保持）
 function updateMembers(n) {
   const states = getCurrentStates();
   initMembers(n, states.names, states.foodEx, states.transportEx, states.campEx);
