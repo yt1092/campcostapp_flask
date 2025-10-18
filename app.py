@@ -1,74 +1,74 @@
-function buildMemberHTML(i, name = `メンバー${i+1}`, foodEx=false, transportEx=false, campEx=false) {
-  return `
-    <div class="border p-2 mb-2 rounded">
-      <label class="form-label">メンバー ${i+1} 名前</label>
-      <input class="form-control mb-2" name="name_${i}" value="${name}">
-      <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" name="food_exempt[${i}]" ${foodEx ? 'checked' : ''}>
-        <label class="form-check-label">食費免除</label>
-      </div>
-      <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" name="transport_exempt[${i}]" ${transportEx ? 'checked' : ''}>
-        <label class="form-check-label">交通免除</label>
-      </div>
-      <div class="form-check form-check-inline">
-        <input class="form-check-input" type="checkbox" name="camp_exempt[${i}]" ${campEx ? 'checked' : ''}>
-        <label class="form-check-label">キャンプ免除</label>
-      </div>
-    </div>
-  `;
-}
+from flask import Flask, render_template, request
+from calc.input_handler import parse_form
+from calc.validator import validate_input
+from calc.calculator import calculate_costs
+from calc.formatter import format_results
+import os
 
-function normalizeBool(val) {
-  return val === true || val === "true" || val === 1;
-}
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
-function initMembers(n, names=[], foodEx=[], transportEx=[], campEx=[]) {
-  const container = document.getElementById('members');
-  container.innerHTML = '';
-  n = Math.max(1, Math.min(100, parseInt(n || 1)));
 
-  for (let i = 0; i < n; i++) {
-    const name = names[i] || `メンバー${i+1}`;
-    const f = foodEx[i] !== undefined ? normalizeBool(foodEx[i]) : false;
-    const t = transportEx[i] !== undefined ? normalizeBool(transportEx[i]) : false;
-    const c = campEx[i] !== undefined ? normalizeBool(campEx[i]) : false;
-    container.insertAdjacentHTML('beforeend', buildMemberHTML(i, name, f, t, c));
-  }
-}
+@app.route("/", methods=["GET"])
+def index():
+    initial_people = 4
+    names = [f"メンバー{i+1}" for i in range(initial_people)]
+    form_food_exempt = [False] * initial_people
+    form_transport_exempt = [False] * initial_people
+    form_camp_exempt = [False] * initial_people
 
-function getCurrentStates() {
-  const container = document.getElementById('members');
-  const names = [], foodEx = [], transportEx = [], campEx = [];
-  container.querySelectorAll('div.border').forEach((div, i) => {
-    names.push(div.querySelector(`input[name="name_${i}"]`).value);
-    foodEx.push(div.querySelector(`input[name="food_exempt[${i}]"]`).checked);
-    transportEx.push(div.querySelector(`input[name="transport_exempt[${i}]"]`).checked);
-    campEx.push(div.querySelector(`input[name="camp_exempt[${i}]"]`).checked);
-  });
-  return { names, foodEx, transportEx, campEx };
-}
+    return render_template(
+        "index.html",
+        form_people=initial_people,
+        form_names=names,
+        form_food=10000,
+        form_transport=8000,
+        form_camp=12000,
+        form_food_exempt=form_food_exempt,
+        form_transport_exempt=form_transport_exempt,
+        form_camp_exempt=form_camp_exempt,
+        results=None,
+        errors=[]
+    )
 
-function updateMembers(n) {
-  const states = getCurrentStates();
-  initMembers(n, states.names, states.foodEx, states.transportEx, states.campEx);
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  const d = window.initialData || {};
-  initMembers(d.form_people, d.form_names, d.form_food_exempt, d.form_transport_exempt, d.form_camp_exempt);
-});
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    data = parse_form(request.form)
 
-document.getElementById('people').addEventListener('input', (e) => {
-  updateMembers(parseInt(e.target.value) || 1);
-});
-document.getElementById('add-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = parseInt(input.value || "0") + 1;
-  updateMembers(parseInt(input.value));
-});
-document.getElementById('remove-person').addEventListener('click', () => {
-  const input = document.getElementById('people');
-  input.value = Math.max(1, parseInt(input.value || "0") - 1);
-  updateMembers(parseInt(input.value));
-});
+    errors = validate_input(data)
+    if errors:
+        return render_template(
+            "index.html",
+            errors=errors,
+            form_people=data.people,
+            form_names=data.names,
+            form_food=int(data.food),
+            form_transport=int(data.transport),
+            form_camp=int(data.camp),
+            form_food_exempt=[bool(x) for x in data.food_exempt],
+            form_transport_exempt=[bool(x) for x in data.transport_exempt],
+            form_camp_exempt=[bool(x) for x in data.camp_exempt],
+            results=None
+        )
+
+    results_raw = calculate_costs(data)
+    results = format_results(results_raw)
+
+    return render_template(
+        "index.html",
+        results=results,
+        errors=[],
+        form_people=data.people,
+        form_names=data.names,
+        form_food=int(data.food),
+        form_transport=int(data.transport),
+        form_camp=int(data.camp),
+        form_food_exempt=[bool(x) for x in data.food_exempt],
+        form_transport_exempt=[bool(x) for x in data.transport_exempt],
+        form_camp_exempt=[bool(x) for x in data.camp_exempt],
+    )
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
