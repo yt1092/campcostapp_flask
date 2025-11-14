@@ -2,12 +2,7 @@ from typing import List
 from calc.m_types import InputData, PersonResult
 
 def calculate_costs(data: InputData) -> List[PersonResult]:
-    """
-    Returns list of PersonResult containing name and total amount (float).
-    Calculation rules:
-      - Each category is split among non-exempt members.
-      - If all are exempt for a category, that category cost is ignored (0 distributed).
-    """
+
     n = data.people
 
     food_contributors = sum(1 for v in data.food_exempt if not v)
