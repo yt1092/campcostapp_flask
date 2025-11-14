@@ -1,9 +1,7 @@
 from calc.m_types import InputData
 
 def validate_input(data: InputData) -> list:
-    """
-    Returns list of error messages (empty if no errors).
-    """
+
     errors = []
     if not (1 <= data.people <= 100):
         errors.append("人数は1〜100の間で指定してください。")
