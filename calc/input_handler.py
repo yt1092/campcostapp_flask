@@ -1,10 +1,7 @@
 from calc.m_types import InputData
 
 def parse_form(form) -> InputData:
-    """
-    フォームデータを InputData に変換
-    空文字や不正な値が来ても安全に処理
-    """
+
     # 人数
     try:
         people = int(form.get("people", 1) or 1)
@@ -27,7 +24,7 @@ def parse_form(form) -> InputData:
     except ValueError:
         camp = 0
 
-    # メンバー名（人数に応じてリスト化）
+    # メンバー名
     names = []
     for i in range(people):
         name = form.get(f"name_{i}", "").strip()
@@ -36,17 +33,15 @@ def parse_form(form) -> InputData:
         names.append(name)
 
     # チェックボックス（免除） → bool リスト
-    def parse_checkbox_list(key: str, length: int) -> list[bool]:
-        raw_list = form.getlist(key)
-        # "true" とか文字列のリストを bool に変換、足りなければ False で補完
-        bool_list = [(v.lower() == "true") for v in raw_list]
-        while len(bool_list) < length:
-            bool_list.append(False)
-        return bool_list[:length]
+    def get_exempt_list(prefix: str) -> list[bool]:
+        lst = []
+        for i in range(people):
+            lst.append(form.get(f"{prefix}{i}") == "on")
+        return lst
 
-    food_exempt = parse_checkbox_list("food_exempt", people)
-    transport_exempt = parse_checkbox_list("transport_exempt", people)
-    camp_exempt = parse_checkbox_list("camp_exempt", people)
+    food_exempt = get_exempt_list("foodExempt_")
+    transport_exempt = get_exempt_list("transportExempt_")
+    camp_exempt = get_exempt_list("campExempt_")
 
     return InputData(
         people=people,
